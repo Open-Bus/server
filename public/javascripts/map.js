@@ -27,32 +27,54 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const htt = __importStar(require("https"));
 //curl --request POST --header "Content-Type: application/json" --data '{"Latitude": 49.287718, "Longitude": -123.023214 }' localhost:3003/stopsNearMe
 function getStopsNearMe() {
-    const data = JSON.stringify({
+
+  try {
+
+    //console.log('hi ');
+
+    // url => 3003-bf592fea-3f4b-44e1-ab79-4fa0aefb044d.cs-us-west1-ijlt.cloudshell.dev
+    // 👇️ const response: Response
+    const response = await fetch('stopsNearMe', {
+    //const response = await fetch('https://3003-bf592fea-3f4b-44e1-ab79-4fa0aefb044d.cs-us-west1-ijlt.cloudshell.dev/stopsNearMe', {
+      method: 'POST',
+      body: JSON.stringify({
         Latitude: 49.287718,
-        Longitude: -123.023214
+        Longitude: -123.023214,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        //'Access-Control-Allow-Origin': '<origin>'
+      },
     });
-    const options = {
-        hostname: `localhost`,
-        port: 3003,
-        path: `stopsNearMe`,
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Content-Length': data.length,
-        },
-    };
-    const req = htt.request(options, res => {
-        console.log(res.statusCode);
-    });
-    req.on('error', error => {
-        console.error(error);
-    });
-    req.end();
+
+    if (!response.ok) {
+      throw new Error(`Error! status: ${response.status}`);
+    }
+
+    // 👇️ const result: CreateUserResponse
+    //const result = (await response.json()) as StopsNearMeResponse;
+
+    //console.log('result is: ', JSON.stringify(result, null, 4));
+    console.log('result is: ', JSON.stringify(await response.json(), null, 4));
+
+    return result;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.log('error message: ', error.message);
+      return error.message;
+    } else {
+      console.log('unexpected error: ', error);
+      return 'An unexpected error occurred';
+    }
+  }
 }
+
 function initMap() {
     navigator.geolocation.getCurrentPosition(showPosition);
     getStopsNearMe();
 }
+
 function showPosition(position) {
     const center = { lat: position.coords.latitude, lng: position.coords.longitude };
     const map = new google.maps.Map(document.getElementById("map"), {
